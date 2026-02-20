@@ -4,12 +4,12 @@ A spy-themed interactive game that teaches you to control Claude Code remotely f
 
 ## Play Online
 
-**[Play Now](https://mohamedeslam.github.io/operation-remote-agent/)** — no install needed.
+**[Play Now](https://jamaikame74-netizen.github.io/operation-remote-agent/)** — no install needed.
 
 ## Run Locally
 
 ```bash
-git clone https://github.com/mohamedeslam/operation-remote-agent.git
+git clone https://github.com/jamaikame74-netizen/operation-remote-agent.git
 cd operation-remote-agent
 npm start
 ```
