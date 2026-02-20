@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operation: Remote Agent</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0e14;
+      --border: #1a2a1e;
+      --green: #00ff41;
+      --green-dim: #0a4a1a;
+      --green-glow: rgba(0,255,65,0.12);
+      --text: #d4e8d0;
+      --text-dim: #5a7a60;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 640px;
+      width: 100%;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .classification {
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      color: var(--green);
+      text-transform: uppercase;
+      border: 1px solid var(--green);
+      display: inline-block;
+      padding: 0.3rem 1rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.8;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--green);
+      text-shadow: 0 0 20px var(--green-glow);
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .versions {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .version-card {
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .version-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 100%;
+      background: var(--green);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .version-card:hover {
+      border-color: var(--green);
+      background: rgba(0,255,65,0.03);
+      transform: translateX(4px);
+    }
+
+    .version-card:hover::before {
+      opacity: 1;
+    }
+
+    .version-tag {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 0.5rem;
+    }
+
+    .version-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .version-desc {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .arrow {
+      position: absolute;
+      right: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--green);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      font-size: 1.2rem;
+    }
+
+    .version-card:hover .arrow {
+      opacity: 1;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 3rem;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      opacity: 0.5;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 1rem; }
+      h1 { font-size: 1.2rem; }
+      .version-card { padding: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="classification">classified // training exercise</div>
+      <h1>Operation: Remote Agent</h1>
+      <p class="subtitle">Select your mission variant, operative.</p>
+    </div>
+
+    <div class="versions">
+      <a href="src/" class="version-card">
+        <div class="version-tag">v1 // terminal quest</div>
+        <div class="version-title">Interactive Mission Briefing</div>
+        <div class="version-desc">
+          A guided terminal experience teaching you to remotely control
+          Claude Code from your iPhone via SSH + tmux. Complete quests,
+          validate setups, and earn your field agent clearance.
+        </div>
+        <span class="arrow">&rarr;</span>
+      </a>
+
+      <a href="src-v2/" class="version-card">
+        <div class="version-tag">v2 // pixel ops</div>
+        <div class="version-title">Pixel Art RPG</div>
+        <div class="version-desc">
+          A top-down RPG adventure with pixel art characters, maps, combat,
+          and quest objectives. Explore the network, defeat bugs, and master
+          the remote agent workflow through gameplay.
+        </div>
+        <span class="arrow">&rarr;</span>
+      </a>
+    </div>
+
+    <div class="footer">
+      &copy; 2026 Operation: Remote Agent &mdash; All systems nominal
+    </div>
+  </div>
+</body>
+</html>

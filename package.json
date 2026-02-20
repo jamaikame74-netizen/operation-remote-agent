@@ -1,0 +1,11 @@
+{
+  "name": "operation-remote-agent",
+  "version": "1.0.0",
+  "description": "A spy-themed terminal quest game that teaches you to control Claude Code remotely from your iPhone via SSH + tmux",
+  "scripts": {
+    "start": "npx serve@latest ."
+  },
+  "keywords": ["game", "terminal", "ssh", "tmux", "claude-code", "learning"],
+  "author": "Mohamed Eslam",
+  "license": "MIT"
+}

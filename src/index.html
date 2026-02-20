@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operation: Remote Agent</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SCREEN 1: MISSION BRIEFING
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="briefingScreen" class="screen briefing-screen">
+  <div class="briefing-header">
+    <div class="briefing-classification">CLASSIFIED // OPERATION: REMOTE AGENT</div>
+    <h1 class="briefing-title">OPERATION: REMOTE AGENT</h1>
+    <div class="briefing-date"></div>
+  </div>
+
+  <div class="briefing-document" id="briefingDoc">
+    <!-- Typewriter text injected by renderer -->
+  </div>
+
+  <div class="briefing-arch" id="briefingArch">
+    <!-- Architecture diagram appears after typewriter -->
+  </div>
+
+  <button class="begin-btn" id="beginBtn">BEGIN MISSION</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SCREEN 2: OPERATIONS HUD (MAIN GAME)
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="hudScreen" class="screen">
+  <div class="header">
+    <h1>OPERATION: REMOTE AGENT</h1>
+    <p class="subtitle">Control Claude Code from your iPhone — anywhere in the world</p>
+  </div>
+
+  <div class="progress-container">
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+    <div class="progress-label">
+      <span id="progressText">0 / 9 quests</span>
+      <span id="progressPct">0%</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Architecture diagram -->
+    <div class="arch-diagram" id="archDiagram"><span class="highlight">┌──────────────┐</span>     Tailscale VPN      <span class="highlight">┌──────────────┐</span>
+<span class="highlight">│</span>   <span class="node" id="archMac">YOUR MAC</span>   <span class="highlight">│</span>◄─────────────────────►<span class="highlight">│</span>  <span class="node" id="archPhone">YOUR iPHONE</span> <span class="highlight">│</span>
+<span class="highlight">│</span>              <span class="highlight">│</span>   (encrypted tunnel)   <span class="highlight">│</span>              <span class="highlight">│</span>
+<span class="highlight">│</span>  <span class="node" id="archTmux">tmux</span>        <span class="highlight">│</span>                        <span class="highlight">│</span>  <span class="node" id="archTermius">Termius</span>     <span class="highlight">│</span>
+<span class="highlight">│</span>  └─ <span class="node" id="archClaude">Claude</span>   <span class="highlight">│</span>◄─── SSH over VPN ─────<span class="highlight">│</span>  └─ <span class="node" id="archSSH">SSH</span>      <span class="highlight">│</span>
+<span class="highlight">│</span>     <span class="node" id="archCode">Code</span>     <span class="highlight">│</span>                        <span class="highlight">│</span>     <span class="node" id="archClient">client</span>   <span class="highlight">│</span>
+<span class="highlight">└──────────────┘</span>                        <span class="highlight">└──────────────┘</span></div>
+
+    <!-- Quest cards injected by renderer -->
+    <div id="questContainer"></div>
+
+    <div style="text-align:center; margin-top:2rem;">
+      <a href="#" id="resetLink" style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);text-decoration:none;">RESET MISSION</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SCREEN 3: VICTORY DEBRIEF
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="victoryScreen" class="screen victory-screen">
+  <div class="victory-banner" id="victoryBanner"></div>
+
+  <div class="victory-arch" id="victoryArch"></div>
+
+  <div class="victory-stats" id="victoryStats"></div>
+
+  <div class="victory-closing" id="victoryClosing"></div>
+
+  <div class="victory-meta" id="victoryMeta"></div>
+
+  <button class="restart-btn" id="restartBtn">RESTART MISSION</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LEVEL TRANSITION OVERLAY
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="level-transition" id="levelTransition">
+  <h2 class="level-trans-title"></h2>
+  <p class="level-trans-subtitle"></p>
+</div>
+
+<!-- App entry point -->
+<script type="module" src="app.js"></script>
+
+</body>
+</html>

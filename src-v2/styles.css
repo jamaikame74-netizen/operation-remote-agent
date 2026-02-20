@@ -1,0 +1,433 @@
+/* styles.css — V2 RPG game styles */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #0a0e14;
+  --bg-card: #111a1f;
+  --bg-terminal: #0d1117;
+  --border: #1a2a1e;
+  --text: #d4e8d0;
+  --text-dim: #5a7a60;
+  --text-muted: #3a5a40;
+  --green: #00ff41;
+  --green-dim: #0a4a1a;
+  --green-glow: rgba(0,255,65,0.12);
+  --green-bright: #4ade80;
+  --orange: #f59e0b;
+  --red: #ef4444;
+  --cyan: #06d6a0;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  color: var(--text);
+}
+
+/* ─── Game Container ─────────────────────────────────────────── */
+#gameContainer {
+  position: relative;
+  width: 640px;
+  height: 480px;
+}
+
+canvas {
+  display: block;
+  background: var(--bg);
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Scanline overlay on canvas */
+#gameContainer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,255,65,0.01) 2px,
+    rgba(0,255,65,0.01) 4px
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ─── Title Screen (HTML overlay) ────────────────────────────── */
+#titleScreen {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: none;
+  pointer-events: none;
+}
+#titleScreen.active { display: flex; align-items: center; justify-content: center; }
+#titleScreen #startBtn { pointer-events: all; }
+
+#startBtn {
+  display: none;
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 32px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  background: transparent;
+  color: var(--green);
+  border: 2px solid var(--green);
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 11;
+  transition: all 0.3s;
+}
+#startBtn:hover {
+  background: var(--green);
+  color: var(--bg);
+  box-shadow: 0 0 20px var(--green-glow);
+}
+
+/* ─── Overlay (shared for dialog/quest) ──────────────────────── */
+#overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 20;
+  display: none;
+}
+#overlay.active { display: block; }
+
+/* ─── Dialog Box ─────────────────────────────────────────────── */
+#dialogBox {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: var(--bg-card);
+  border: 2px solid var(--green-dim);
+  border-radius: 8px;
+  padding: 16px 20px;
+  z-index: 21;
+  display: none;
+  font-size: 13px;
+  line-height: 1.6;
+}
+#dialogBox.active { display: block; }
+
+.dialog-speaker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+.dialog-text { color: var(--text); }
+.dialog-prompt {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+/* ─── Quest Panel ────────────────────────────────────────────── */
+#questPanel {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  bottom: 20px;
+  width: 360px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  z-index: 21;
+  display: none;
+  overflow-y: auto;
+  font-size: 13px;
+}
+#questPanel.active { display: block; }
+#questPanel::-webkit-scrollbar { width: 4px; }
+#questPanel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.quest-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg-card);
+  z-index: 1;
+}
+.quest-panel-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.quest-panel-badge.active {
+  background: var(--green-glow);
+  color: var(--green);
+  border: 1px solid rgba(0,255,65,0.25);
+}
+.quest-panel-badge.complete {
+  background: rgba(0,255,65,0.08);
+  color: var(--green-dim);
+}
+.quest-panel-title {
+  font-weight: 600;
+  flex: 1;
+}
+.quest-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+}
+.quest-close-btn:hover { color: var(--text); }
+
+.quest-panel-body {
+  padding: 12px 16px 16px;
+}
+.quest-panel-body h3 {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 16px 0 6px;
+}
+.quest-panel-body p, .quest-panel-body li {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.quest-panel-body ul { padding-left: 16px; }
+.quest-panel-body li { margin-bottom: 3px; }
+
+code {
+  font-family: var(--font-mono);
+  background: rgba(0,255,65,0.08);
+  color: var(--green-bright);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.step-list { counter-reset: step; list-style: none; padding-left: 0; }
+.step-list li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 8px;
+}
+.step-list li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0; top: 1px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--green-glow);
+  border: 1px solid rgba(0,255,65,0.2);
+  color: var(--green);
+  font-size: 9px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+}
+
+.info-box {
+  background: rgba(6,214,160,0.06);
+  border-left: 3px solid var(--cyan);
+  padding: 8px 10px;
+  border-radius: 0 4px 4px 0;
+  margin: 8px 0;
+  font-size: 11px;
+}
+.hint-box {
+  background: rgba(245,158,11,0.06);
+  border-left: 3px solid var(--orange);
+  padding: 8px 10px;
+  border-radius: 0 4px 4px 0;
+  margin: 8px 0;
+  font-size: 11px;
+}
+.hint-box strong { color: var(--orange); }
+
+.cmd-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-size: 11px;
+}
+.cmd-table th, .cmd-table td {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+.cmd-table th {
+  background: rgba(0,255,65,0.03);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+/* Terminal (inside quest panel) */
+.terminal {
+  background: var(--bg-terminal);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 8px 0;
+  overflow: hidden;
+}
+.terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid var(--border);
+}
+.terminal-dot { width: 8px; height: 8px; border-radius: 50%; }
+.terminal-dot.r { background: #ef4444; }
+.terminal-dot.y { background: #f59e0b; }
+.terminal-dot.g { background: #22c55e; }
+.terminal-title {
+  flex: 1; text-align: center;
+  font-family: var(--font-mono);
+  font-size: 9px; color: var(--text-muted);
+}
+.terminal-body {
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px; line-height: 1.8;
+  min-height: 60px; max-height: 180px;
+  overflow-y: auto;
+}
+.terminal-body::-webkit-scrollbar { width: 3px; }
+.terminal-body::-webkit-scrollbar-thumb { background: var(--border); }
+.term-line { white-space: pre-wrap; word-break: break-all; }
+.term-prompt { color: var(--green); }
+.term-output { color: var(--text-dim); }
+.term-success { color: var(--green-bright); }
+.term-error { color: var(--red); }
+.term-info { color: var(--cyan); }
+.terminal-input-area { padding: 0 10px 6px; }
+.terminal-input-row { display: flex; align-items: center; }
+.terminal-input {
+  flex: 1; background: none; border: none;
+  color: var(--text); font-family: var(--font-mono);
+  font-size: 11px; outline: none;
+  caret-color: var(--green);
+}
+.terminal-input::placeholder { color: var(--text-muted); }
+
+/* Validation checks */
+.validation { margin: 8px 0; }
+.val-item { display: flex; align-items: center; gap: 6px; padding: 3px 0; font-size: 11px; }
+.val-check {
+  width: 16px; height: 16px;
+  border: 2px solid var(--text-muted);
+  border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s;
+  flex-shrink: 0; font-size: 9px; font-family: var(--font-mono);
+}
+.val-check:hover { border-color: var(--green); }
+.val-check.checked {
+  border-color: var(--green);
+  background: var(--green-glow);
+  color: var(--green);
+}
+
+.complete-btn {
+  display: block; width: 100%;
+  padding: 8px; margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 600;
+  border: none; border-radius: 6px;
+  cursor: pointer; text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.complete-btn.ready {
+  background: linear-gradient(135deg, var(--green-dim), #0a6a2a);
+  color: var(--green);
+  border: 1px solid rgba(0,255,65,0.3);
+}
+.complete-btn.ready:hover { box-shadow: 0 0 16px var(--green-glow); }
+.complete-btn.disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
+.complete-btn.done { background: var(--green-glow); color: var(--green-dim); cursor: default; }
+
+/* ─── Victory & Death Overlays ───────────────────────────────── */
+#victoryOverlay, #deathOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: rgba(0,0,0,0.85);
+}
+#victoryOverlay.active, #deathOverlay.active { display: flex; }
+
+#victoryOverlay h2 {
+  font-family: var(--font-mono);
+  color: var(--green);
+  font-size: 18px;
+  margin-bottom: 8px;
+  text-shadow: 0 0 20px rgba(0,255,65,0.3);
+}
+#deathOverlay h2 {
+  font-family: var(--font-mono);
+  color: var(--red);
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+#victoryOverlay p, #deathOverlay p {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.overlay-btn {
+  padding: 10px 24px;
+  font-family: var(--font-mono);
+  font-size: 12px; font-weight: 600;
+  background: transparent;
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+}
+.overlay-btn:hover {
+  background: var(--green-glow);
+  border-color: var(--green);
+}
+
+/* ─── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 660px) {
+  #gameContainer { width: 100vw; height: calc(100vw * 0.75); }
+  canvas { width: 100% !important; height: 100% !important; }
+  #questPanel { width: 280px; top: 10px; right: 10px; bottom: 10px; }
+}

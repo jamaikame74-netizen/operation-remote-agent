@@ -1,0 +1,14 @@
+# Claude Code
+.claude/
+
+# Project management folders
+_BRIEF/
+_SESSION_MAP/
+output/
+output-v2/
+docs/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
