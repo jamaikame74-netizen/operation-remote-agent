@@ -4,24 +4,17 @@ A spy-themed interactive game that teaches you to control Claude Code remotely f
 
 ## Play Online
 
-**[Play Now](https://jamaikame74-netizen.github.io/operation-remote-agent/)** — no install needed.
+**[Play Now](https://MasterfullyClaw.github.io/operation-remote-agent/)** — no install needed.
 
 ## Run Locally
 
 ```bash
-git clone https://github.com/jamaikame74-netizen/operation-remote-agent.git
+git clone https://github.com/MasterfullyClaw/operation-remote-agent.git
 cd operation-remote-agent
 npm start
 ```
 
 > Requires Node.js. The `npm start` command uses [`serve`](https://npmjs.com/package/serve) to host the game locally.
-
-## Game Versions
-
-| Version | Description |
-|---------|-------------|
-| **V1 — Terminal Quest** | Guided mission briefing with interactive terminal simulators, quest validation, and architecture diagrams |
-| **V2 — Pixel Ops** | Top-down pixel art RPG with combat, NPCs, and quest objectives |
 
 ## What You'll Learn
 
