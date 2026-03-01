@@ -1,16 +1,48 @@
-// src/app.js — Application init: wire state → renderer → screens
+// src/app.js — Application init: OS selector → briefing → HUD
 
 import { QUESTS } from './data/quests.js';
+import { QUESTS_WINDOWS } from './data/quests-windows.js';
 import { GameState } from './state.js';
 import { Renderer } from './renderer.js';
 
 // ─── Initialize ─────────────────────────────────────────────────
-const state = new GameState(QUESTS.length);
-const renderer = new Renderer(state);
+let state = null;
+let renderer = null;
 
-function init() {
-  // Decide which screen to show
-  if (state.isGameComplete()) {
+function getQuests() {
+  return state.os === 'windows' ? QUESTS_WINDOWS : QUESTS;
+}
+
+function boot() {
+  const quests = getQuests();
+  state = new GameState(quests.length);
+
+  // Re-read OS after state load (state constructor reads from localStorage)
+  renderer = new Renderer(state);
+
+  route();
+  wireButtons();
+
+  // Re-route when OS is selected
+  state.events.on('osSelected', () => {
+    // Rebuild state with correct quest count for the chosen OS
+    const newQuests = getQuests();
+    state.totalQuests = newQuests.length;
+    renderer.renderBriefing();
+    renderer.showScreen('briefingScreen');
+  });
+
+  state.events.on('reset', () => {
+    renderer.showScreen('osSelectorScreen');
+    renderer.renderOSSelector();
+  });
+}
+
+function route() {
+  if (!state.os) {
+    renderer.showScreen('osSelectorScreen');
+    renderer.renderOSSelector();
+  } else if (state.isGameComplete()) {
     renderer.renderVictory();
     renderer.showScreen('victoryScreen');
   } else if (!state.briefingSeen) {
@@ -20,8 +52,9 @@ function init() {
     renderer.showScreen('hudScreen');
     renderer.renderHUD();
   }
+}
 
-  // ─── Wire Buttons ──────────────────────────────────────────
+function wireButtons() {
   document.getElementById('beginBtn')?.addEventListener('click', () => {
     state.markBriefingSeen();
     renderer.showScreen('hudScreen');
@@ -34,21 +67,15 @@ function init() {
 
   document.getElementById('resetLink')?.addEventListener('click', (e) => {
     e.preventDefault();
-    if (confirm('Reset all progress? This cannot be undone.')) {
+    if (confirm('Reset all progress and OS selection? This cannot be undone.')) {
       state.reset();
     }
-  });
-
-  // ─── Wire State Events ────────────────────────────────────
-  state.events.on('reset', () => {
-    renderer.showScreen('briefingScreen');
-    renderer.renderBriefing();
   });
 }
 
 // ─── Boot ───────────────────────────────────────────────────────
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
+  document.addEventListener('DOMContentLoaded', boot);
 } else {
-  init();
+  boot();
 }

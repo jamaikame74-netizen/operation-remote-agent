@@ -27,6 +27,7 @@ export class Terminal {
     const cmdIdx = this.state.getTerminalCmdIndex(this.questIdx);
     const allDone = cmdIdx >= this.data.commands.length;
     const nextCmd = this.data.commands[cmdIdx];
+    const prompt = this.data.prompt || '~ % ';
 
     const el = document.createElement('div');
     el.className = 'terminal';
@@ -48,7 +49,7 @@ export class Terminal {
       </div>
       <div class="terminal-input-area">
         <div class="terminal-input-row">
-          <span class="term-prompt">~ % </span>
+          <span class="term-prompt">${escapeHtml(prompt)}</span>
           <input type="text" class="terminal-input"
             placeholder="${allDone ? 'All commands completed' : 'Type command here...'}"
             ${allDone ? 'disabled' : ''}
@@ -83,7 +84,8 @@ export class Terminal {
     const expected = this.data.commands[cmdIdx];
 
     // Echo the typed command
-    this._appendLine('term-line', `<span class="term-prompt">~ % </span>${escapeHtml(cmd)}`);
+    const prompt = this.data.prompt || '~ % ';
+    this._appendLine('term-line', `<span class="term-prompt">${escapeHtml(prompt)}</span>${escapeHtml(cmd)}`);
 
     if (expected && normalizeCmd(cmd) === normalizeCmd(expected.cmd)) {
       // Correct command

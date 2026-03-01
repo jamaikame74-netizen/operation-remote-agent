@@ -10,6 +10,20 @@
 <body>
 
 <!-- ═══════════════════════════════════════════════════════════════
+     SCREEN 0: OS SELECTOR
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="osSelectorScreen" class="screen os-selector-screen">
+  <div class="os-selector-header">
+    <div class="briefing-classification">CLASSIFIED // OPERATION: REMOTE AGENT</div>
+    <h1 class="briefing-title">OPERATION: REMOTE AGENT</h1>
+    <p class="os-selector-subtitle">Select your base station operating system, operative.</p>
+  </div>
+  <div id="osSelectorContent" class="os-selector-cards">
+    <!-- Cards injected by renderer -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
      SCREEN 1: MISSION BRIEFING
      ═══════════════════════════════════════════════════════════════ -->
 <div id="briefingScreen" class="screen briefing-screen">
@@ -50,14 +64,8 @@
   </div>
 
   <div class="main">
-    <!-- Architecture diagram -->
-    <div class="arch-diagram" id="archDiagram"><span class="highlight">┌──────────────┐</span>     Tailscale VPN      <span class="highlight">┌──────────────┐</span>
-<span class="highlight">│</span>   <span class="node" id="archMac">YOUR MAC</span>   <span class="highlight">│</span>◄─────────────────────►<span class="highlight">│</span>  <span class="node" id="archPhone">YOUR iPHONE</span> <span class="highlight">│</span>
-<span class="highlight">│</span>              <span class="highlight">│</span>   (encrypted tunnel)   <span class="highlight">│</span>              <span class="highlight">│</span>
-<span class="highlight">│</span>  <span class="node" id="archTmux">tmux</span>        <span class="highlight">│</span>                        <span class="highlight">│</span>  <span class="node" id="archTermius">Termius</span>     <span class="highlight">│</span>
-<span class="highlight">│</span>  └─ <span class="node" id="archClaude">Claude</span>   <span class="highlight">│</span>◄─── SSH over VPN ─────<span class="highlight">│</span>  └─ <span class="node" id="archSSH">SSH</span>      <span class="highlight">│</span>
-<span class="highlight">│</span>     <span class="node" id="archCode">Code</span>     <span class="highlight">│</span>                        <span class="highlight">│</span>     <span class="node" id="archClient">client</span>   <span class="highlight">│</span>
-<span class="highlight">└──────────────┘</span>                        <span class="highlight">└──────────────┘</span></div>
+    <!-- Architecture diagram — rendered dynamically by renderer.js -->
+    <div class="arch-diagram" id="archDiagram"></div>
 
     <!-- Quest cards injected by renderer -->
     <div id="questContainer"></div>
@@ -73,15 +81,10 @@
      ═══════════════════════════════════════════════════════════════ -->
 <div id="victoryScreen" class="screen victory-screen">
   <div class="victory-banner" id="victoryBanner"></div>
-
   <div class="victory-arch" id="victoryArch"></div>
-
   <div class="victory-stats" id="victoryStats"></div>
-
   <div class="victory-closing" id="victoryClosing"></div>
-
   <div class="victory-meta" id="victoryMeta"></div>
-
   <button class="restart-btn" id="restartBtn">RESTART MISSION</button>
 </div>
 

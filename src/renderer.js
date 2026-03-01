@@ -1,10 +1,13 @@
-// src/renderer.js — DOM rendering engine: quests, progress, arch diagram, screens
+// src/renderer.js — DOM rendering engine: OS selector, quests, progress, arch diagram, screens
 
 import { QUESTS } from './data/quests.js';
+import { QUESTS_WINDOWS } from './data/quests-windows.js';
 import { LEVELS } from './data/levels.js';
+import { LEVELS_WINDOWS } from './data/levels-windows.js';
 import { BRIEFING, VICTORY } from './data/narrative.js';
+import { BRIEFING_WINDOWS, VICTORY_WINDOWS } from './data/narrative-windows.js';
 import { Terminal } from './terminal.js';
-import { typewriter, fadeIn, showLevelTransition, glowPulse } from './animations.js';
+import { typewriter, fadeIn, showLevelTransition } from './animations.js';
 
 function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -13,9 +16,26 @@ function escapeHtml(str) {
 export class Renderer {
   constructor(state) {
     this.state = state;
-    this.terminals = {};      // questIdx → Terminal instance
+    this.terminals = {};
     this._typewriterCtrl = null;
-    this._expandedQuest = null; // currently expanded quest index
+    this._expandedQuest = null;
+  }
+
+  // ─── OS-aware data helpers ───────────────────────────────────
+  get quests() {
+    return this.state.os === 'windows' ? QUESTS_WINDOWS : QUESTS;
+  }
+
+  get levels() {
+    return this.state.os === 'windows' ? LEVELS_WINDOWS : LEVELS;
+  }
+
+  get briefing() {
+    return this.state.os === 'windows' ? BRIEFING_WINDOWS : BRIEFING;
+  }
+
+  get victory() {
+    return this.state.os === 'windows' ? VICTORY_WINDOWS : VICTORY;
   }
 
   // ─── Screen Management ──────────────────────────────────────
@@ -23,6 +43,48 @@ export class Renderer {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const el = document.getElementById(screenId);
     if (el) el.classList.add('active');
+  }
+
+  // ─── OS Selector Screen ──────────────────────────────────────
+  renderOSSelector() {
+    const container = document.getElementById('osSelectorContent');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const cards = [
+      {
+        os: 'mac',
+        label: 'macOS',
+        tag: 'v1 // macos',
+        title: 'Mac Setup',
+        desc: 'Homebrew · tmux · SSH · Tailscale\nNative terminal, no extra layers.',
+        icon: '⌘'
+      },
+      {
+        os: 'windows',
+        label: 'Windows',
+        tag: 'v1 // windows',
+        title: 'Windows Setup',
+        desc: 'WSL (Ubuntu) · OpenSSH Server · Tailscale\nFull Linux environment inside Windows.',
+        icon: '⊞'
+      }
+    ];
+
+    cards.forEach(card => {
+      const el = document.createElement('div');
+      el.className = 'os-card';
+      el.innerHTML = `
+        <div class="os-card-tag">${escapeHtml(card.tag)}</div>
+        <div class="os-card-icon">${card.icon}</div>
+        <div class="os-card-title">${escapeHtml(card.title)}</div>
+        <div class="os-card-desc">${escapeHtml(card.desc)}</div>
+        <div class="os-card-arrow">→</div>
+      `;
+      el.addEventListener('click', () => {
+        this.state.selectOS(card.os);
+      });
+      container.appendChild(el);
+    });
   }
 
   // ─── Mission Briefing ───────────────────────────────────────
@@ -33,31 +95,30 @@ export class Renderer {
     if (!doc) return;
 
     doc.innerHTML = '';
+    arch.classList.remove('visible');
+    btn.classList.remove('visible');
 
-    // Set date
     const dateEl = document.querySelector('.briefing-date');
-    if (dateEl) dateEl.textContent = BRIEFING.date;
+    if (dateEl) dateEl.textContent = this.briefing.date;
 
-    // Typewriter the briefing text
-    this._typewriterCtrl = typewriter(doc, BRIEFING.lines, {
+    const classEl = document.querySelector('.briefing-classification');
+    if (classEl) classEl.textContent = this.briefing.classification;
+
+    this._typewriterCtrl = typewriter(doc, this.briefing.lines, {
       charDelay: 18,
       lineDelay: 60,
       onComplete: () => {
-        // Show architecture diagram
-        arch.textContent = BRIEFING.archDiagram.join('\n');
+        arch.textContent = this.briefing.archDiagram.join('\n');
         arch.classList.add('visible');
-
-        // Show begin button after a beat
         setTimeout(() => btn.classList.add('visible'), 600);
       }
     });
 
-    // Click to skip typewriter
     doc.addEventListener('click', () => {
       if (this._typewriterCtrl) {
         this._typewriterCtrl.skip();
         this._typewriterCtrl = null;
-        arch.textContent = BRIEFING.archDiagram.join('\n');
+        arch.textContent = this.briefing.archDiagram.join('\n');
         arch.classList.add('visible');
         setTimeout(() => btn.classList.add('visible'), 200);
       }
@@ -66,6 +127,13 @@ export class Renderer {
 
   // ─── Operations HUD ─────────────────────────────────────────
   renderHUD() {
+    // Update subtitle for OS
+    const subtitle = document.querySelector('.header .subtitle');
+    if (subtitle) {
+      subtitle.textContent = this.state.os === 'windows'
+        ? 'Control Claude Code from your iPhone — anywhere in the world'
+        : 'Control Claude Code from your iPhone — anywhere in the world';
+    }
     this.updateProgress();
     this.renderArchDiagram();
     this.renderQuests();
@@ -85,20 +153,20 @@ export class Renderer {
     const container = document.getElementById('archDiagram');
     if (!container) return;
 
-    // All node IDs that can be highlighted
+    // Set OS-specific arch HTML
+    container.innerHTML = this.briefing.archHtml;
+
     const allNodes = [
       'archMac', 'archPhone', 'archTmux', 'archTermius',
       'archClaude', 'archCode', 'archSSH', 'archClient'
     ];
 
-    // Determine which nodes to highlight based on current quest
-    const quest = QUESTS[this.state.currentQuest];
+    const quest = this.quests[this.state.currentQuest];
     const activeNodes = quest ? quest.archHighlight : [];
 
-    // Collect all nodes that are "complete" (from completed quests)
     const completeNodes = new Set();
     for (const idx of this.state.completed) {
-      (QUESTS[idx].archHighlight || []).forEach(n => completeNodes.add(n));
+      (this.quests[idx].archHighlight || []).forEach(n => completeNodes.add(n));
     }
 
     allNodes.forEach(id => {
@@ -118,15 +186,12 @@ export class Renderer {
     if (!container) return;
     container.innerHTML = '';
 
-    // Determine which quest should be auto-expanded
     const autoExpand = this._expandedQuest ?? this.state.currentQuest;
 
-    LEVELS.forEach((level, li) => {
-      // Level section
+    this.levels.forEach((level) => {
       const section = document.createElement('div');
       section.className = 'level-section';
 
-      // Level header
       const header = document.createElement('div');
       header.className = 'level-header';
       header.innerHTML = `
@@ -136,7 +201,6 @@ export class Renderer {
       `;
       section.appendChild(header);
 
-      // Quest cards for this level
       const [startIdx, endIdx] = level.questRange;
       for (let qi = startIdx; qi <= endIdx; qi++) {
         section.appendChild(this._renderQuestCard(qi, autoExpand));
@@ -147,7 +211,7 @@ export class Renderer {
   }
 
   _renderQuestCard(questIdx, autoExpand) {
-    const quest = QUESTS[questIdx];
+    const quest = this.quests[questIdx];
     const status = this.state.getQuestStatus(questIdx);
     const isExpanded = questIdx === autoExpand;
 
@@ -160,7 +224,6 @@ export class Renderer {
     if (status === 'locked') card.classList.add('locked');
     if (isExpanded && status !== 'locked') card.classList.add('expanded');
 
-    // Status icon
     let statusIcon, statusClass;
     if (status === 'complete') {
       statusIcon = '\u2713';
@@ -173,7 +236,6 @@ export class Renderer {
       statusClass = 'pending';
     }
 
-    // Quest header
     const headerEl = document.createElement('div');
     headerEl.className = 'quest-header';
     headerEl.innerHTML = `
@@ -187,14 +249,10 @@ export class Renderer {
     headerEl.addEventListener('click', () => this._toggleQuest(questIdx));
     card.appendChild(headerEl);
 
-    // Quest body (expandable content)
     const body = document.createElement('div');
     body.className = 'quest-body';
-
-    // Quest content HTML
     body.innerHTML = quest.body;
 
-    // Terminal simulator (if quest has one)
     if (quest.terminal) {
       const term = new Terminal(quest.terminal, questIdx, this.state);
       this.terminals[questIdx] = term;
@@ -204,7 +262,6 @@ export class Renderer {
       body.appendChild(term.render());
     }
 
-    // Hint box
     if (quest.hint) {
       const hint = document.createElement('div');
       hint.className = 'hint-box';
@@ -212,7 +269,6 @@ export class Renderer {
       body.appendChild(hint);
     }
 
-    // Validation section
     const valH3 = document.createElement('h3');
     valH3.textContent = 'Validation';
     body.appendChild(valH3);
@@ -236,7 +292,6 @@ export class Renderer {
     });
     body.appendChild(valDiv);
 
-    // Complete button
     const allChecked = this.state.allChecksComplete(questIdx, quest.checks.length);
     const btn = document.createElement('button');
     btn.className = 'complete-btn';
@@ -264,23 +319,17 @@ export class Renderer {
     const status = this.state.getQuestStatus(questIdx);
     if (status === 'locked') return;
 
-    if (this._expandedQuest === questIdx) {
-      this._expandedQuest = null;
-    } else {
-      this._expandedQuest = questIdx;
-    }
+    this._expandedQuest = (this._expandedQuest === questIdx) ? null : questIdx;
     this.renderQuests();
   }
 
   _refreshQuestCard(questIdx) {
-    // Re-render just the affected card's validation and button
     const card = document.querySelector(`.quest-card[data-quest="${questIdx}"]`);
     if (!card) return;
 
-    const quest = QUESTS[questIdx];
+    const quest = this.quests[questIdx];
     const status = this.state.getQuestStatus(questIdx);
 
-    // Update check marks
     card.querySelectorAll('.val-item').forEach((item, ci) => {
       const check = item.querySelector('.val-check');
       const checked = this.state.isCheckChecked(questIdx, ci);
@@ -288,7 +337,6 @@ export class Renderer {
       check.textContent = checked ? '\u2713' : '';
     });
 
-    // Update button
     const allChecked = this.state.allChecksComplete(questIdx, quest.checks.length);
     const btn = card.querySelector('.complete-btn');
     if (btn && status !== 'complete') {
@@ -307,12 +355,11 @@ export class Renderer {
   }
 
   async _onCompleteQuest(questIdx) {
-    const quest = QUESTS[questIdx];
+    const quest = this.quests[questIdx];
     if (!this.state.allChecksComplete(questIdx, quest.checks.length)) return;
 
-    // Check if we're crossing a level boundary
-    const currentLevel = QUESTS[questIdx].level;
-    const nextQuest = QUESTS[questIdx + 1];
+    const currentLevel = this.quests[questIdx].level;
+    const nextQuest = this.quests[questIdx + 1];
     const crossingLevel = nextQuest && nextQuest.level !== currentLevel;
 
     this.state.completeQuest(questIdx);
@@ -323,9 +370,8 @@ export class Renderer {
       return;
     }
 
-    // Level transition if crossing boundary
     if (crossingLevel) {
-      const nextLevel = LEVELS.find(l => {
+      const nextLevel = this.levels.find(l => {
         const [s, e] = l.questRange;
         return questIdx + 1 >= s && questIdx + 1 <= e;
       });
@@ -343,6 +389,7 @@ export class Renderer {
 
   // ─── Victory Screen ─────────────────────────────────────────
   renderVictory() {
+    const v = this.victory;
     const banner = document.getElementById('victoryBanner');
     const arch = document.getElementById('victoryArch');
     const stats = document.getElementById('victoryStats');
@@ -350,13 +397,12 @@ export class Renderer {
     const meta = document.getElementById('victoryMeta');
 
     if (banner) {
-      banner.textContent = VICTORY.banner.join('\n');
+      banner.textContent = v.banner.join('\n');
       fadeIn(banner, 800);
     }
 
     if (arch) {
-      // Full architecture diagram — all nodes lit
-      arch.innerHTML = BRIEFING.archDiagram.map(line =>
+      arch.innerHTML = this.briefing.archDiagram.map(line =>
         `<span style="color:var(--green)">${escapeHtml(line)}</span>`
       ).join('\n');
       fadeIn(arch, 800, 400);
@@ -364,7 +410,7 @@ export class Renderer {
 
     if (stats) {
       stats.innerHTML = '';
-      VICTORY.stats.components.forEach((comp, i) => {
+      v.stats.components.forEach((comp, i) => {
         const card = document.createElement('div');
         card.className = 'stat-card';
         card.innerHTML = `
@@ -379,13 +425,12 @@ export class Renderer {
     }
 
     if (closing) {
-      closing.textContent = VICTORY.closingLine;
+      closing.textContent = v.closingLine;
       fadeIn(closing, 600, 1400);
     }
 
     if (meta) {
-      const { pct } = this.state.getProgress();
-      meta.textContent = `CAPABILITY: ${VICTORY.stats.capability}  |  RANGE: ${VICTORY.stats.range}  |  COST: ${VICTORY.stats.cost}`;
+      meta.textContent = `CAPABILITY: ${v.stats.capability}  |  RANGE: ${v.stats.range}  |  COST: ${v.stats.cost}`;
       fadeIn(meta, 600, 1600);
     }
   }

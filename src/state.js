@@ -1,6 +1,7 @@
 // src/state.js — Game state management + localStorage persistence + event bus
 
 const STORAGE_KEY = 'remoteAgentGame';
+const OS_KEY = 'remoteAgentOS';
 
 // ─── Simple Event Bus ───────────────────────────────────────────
 class EventBus {
@@ -33,6 +34,7 @@ export class GameState {
     this.checksState = {};       // 'questIdx-checkIdx' → boolean
     this.terminalCmdIndex = {};  // questIdx → next expected cmd index
     this.briefingSeen = false;
+    this.os = localStorage.getItem(OS_KEY) || null; // 'mac' | 'windows' | null
     this._load();
   }
 
@@ -102,6 +104,12 @@ export class GameState {
   }
 
   // ─── Mutations ──────────────────────────────────────────────
+  selectOS(os) {
+    this.os = os;
+    localStorage.setItem(OS_KEY, os);
+    this.events.emit('osSelected', { os });
+  }
+
   markBriefingSeen() {
     this.briefingSeen = true;
     this._save();
@@ -142,7 +150,9 @@ export class GameState {
     this.checksState = {};
     this.terminalCmdIndex = {};
     this.briefingSeen = false;
+    this.os = null;
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(OS_KEY);
     this.events.emit('reset');
     this.events.emit('stateChange');
   }
