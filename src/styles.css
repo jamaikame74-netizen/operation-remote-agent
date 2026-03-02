@@ -1405,28 +1405,12 @@ kbd.tmux-key {
   --cyan:           #40c8a0;
   --cyan-glow:      rgba(64, 200, 160, 0.12);
   --terminal-green: #aaff44;
-  --font-mono:      'VT323', monospace;
-  --font-sans:      'VT323', monospace;
+  --font-mono:      'Space Mono', monospace;
+  --font-sans:      'Space Mono', monospace;
 }
 
 /* ── Retro Typography ─────────────────────────────────────────── */
-/* Pixel arcade font for major headings (safe ≥ 8px sizes only)  */
-[data-skin="retro"] h1,
-[data-skin="retro"] .briefing-title {
-  font-family: 'Press Start 2P', monospace;
-  letter-spacing: 0.06em;
-  line-height: 1.7;
-}
-
-[data-skin="retro"] .level-badge {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 0.5rem;
-  letter-spacing: 0.04em;
-}
-
-/* Slight size boost — VT323 reads better at 1.1× */
 [data-skin="retro"] body {
-  font-size: 1.1em;
   animation: crt-flicker 8s infinite;   /* reuses existing keyframe */
 }
 
